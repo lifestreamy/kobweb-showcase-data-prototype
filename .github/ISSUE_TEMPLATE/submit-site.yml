@@ -1,0 +1,81 @@
+name: "🚀 Submit a Kobweb Project"
+description: "Submit your project to be featured on the official Kobweb Showcase!"
+title: "Showcase Submission: <Your Site Name>"
+labels: ["showcase-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome to the Kobweb Showcase! 🎉
+        Fill out the form below to submit your project. A maintainer will review it shortly.
+        *Please ensure your site is live and the image is a clear screenshot of your app.*
+
+  - type: input
+    id: site_name
+    attributes:
+      label: "Project Name"
+      description: "What is the name of your website or application?"
+      placeholder: "e.g., My Awesome Kobweb App"
+    validations:
+      required: true
+
+  - type: input
+    id: site_url
+    attributes:
+      label: "Live URL"
+      description: "Where is your project hosted? (Must include https://)"
+      placeholder: "https://my-app.example.com"
+    validations:
+      required: true
+
+  - type: textarea
+    id: image_url
+    attributes:
+      label: "Project Screenshot"
+      description: "Drag and drop a single screenshot of your app here. GitHub will automatically upload it and generate a Markdown image link. **Please leave the generated markdown link exactly as is.**"
+      placeholder: "Drag and drop your image here..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Project Description"
+      description: "What does your site do? Give us a short pitch."
+      placeholder: "This site is a portfolio showing off my..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: features
+    attributes:
+      label: "Core Features"
+      description: "Select all the keywords that apply to your project."
+      multiple: true
+      options:
+        - "Static Site (SSG)"
+        - "Fullstack"
+        - "Database Integration"
+        - "Animations"
+        - "Commercial"
+        - "Open Source"
+        - "Complex UI"
+    validations:
+      required: false
+
+  - type: input
+    id: custom_features
+    attributes:
+      label: "Other Keywords"
+      description: "Any other features? (Semicolon separated)"
+      placeholder: "e.g., JS/TS Integration; WebGL; Spring Boot; Web Components; SEO-optimized"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: "Submission Agreement"
+      options:
+        - label: "I confirm that this project is built using Kobweb and is safe for public viewing."
+          required: true
