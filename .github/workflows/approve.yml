@@ -31,11 +31,21 @@ jobs:
         run: |
           import json
           import os
-          import re
+          import sys
 
           # Read the parsed data
+          # NOTE: because form fields are rendered into pure markdown with no id tags
+          # the issue forms plugin has to reference labels from the submit-site.yml, not id's 
+          # (labels get auto-formatted to kebab case by the plugin)
           parsed_data_str = os.environ.get('PARSED_DATA', '{}')
-          parsed_data = json.loads(parsed_data_str)
+          
+          try:
+              parsed_data = json.loads(parsed_data_str)
+              if isinstance(parsed_data, str):
+                  parsed_data = json.loads(parsed_data)
+          except Exception as e:
+              print(f"::error::Failed to parse JSON data from GitHub Action: {e}")
+              sys.exit(1)
 
           # Helper for extracting text from the zentered JSON structure
           def get_text(key):
@@ -50,31 +60,44 @@ jobs:
           issue_id = int(os.environ['ISSUE_NUMBER'])
           
           # Format URL (Auto-append https:// if missing)
-          raw_site_url = get_text('site_url').strip()
+          raw_site_url = get_text('live-url').strip()
           clean_site_url = raw_site_url if raw_site_url.startswith(('http://', 'https://')) else f"https://{raw_site_url}"
 
           # Format Image (Extract clean URL from Markdown)
-          raw_image = get_text('image_url').strip()
+          raw_image = get_text('project-screenshot').strip()
           clean_image_url = raw_image
           
-          # Check if it looks like a Markdown image: ![alt](url)
           if raw_image.startswith('![') and '](' in raw_image and raw_image.endswith(')'):
-              # Split by '](', take the second half, remove the trailing ')'
               clean_image_url = raw_image.split('](')[1][:-1]
 
           # Format features (convert commas to semicolons, split cleanly)
-          features = get_text('features').replace(',', ';')
-          custom_features = get_text('custom_features').replace(',', ';')
+          features = get_text('core-features').replace(',', ';')
+          custom_features = get_text('other-keywords').replace(',', ';')
           raw_features = f"{features};{custom_features}"
           clean_tags = [tag.strip() for tag in raw_features.split(';') if tag.strip() != 'None' and tag.strip()]
+
+          site_name = get_text('project-name').strip()
+
+          # Validation: Check for empty critical fields
+          if not site_name:
+              print("::error::Validation Failed: Site name cannot be empty.")
+              sys.exit(1)
+          
+          if not clean_site_url or clean_site_url == "https://":
+              print("::error::Validation Failed: Invalid or missing Site URL.")
+              sys.exit(1)
+
+          if not clean_image_url:
+              print("::error::Validation Failed: Invalid or missing Image URL.")
+              sys.exit(1)
 
           # Build the new site dict
           new_site = {
               "issueNumber": issue_id,
-              "name": get_text('site_name').strip(),
+              "name": site_name,
               "url": clean_site_url,
               "imageUrl": clean_image_url,
-              "description": get_text('description').strip(),
+              "description": get_text('project-description').strip(),
               "tags": clean_tags
           }
 
@@ -104,4 +127,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been approved and added to the showcase."
+          gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been approved and added to the showcase!"
