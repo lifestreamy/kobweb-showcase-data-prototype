@@ -23,8 +23,8 @@ body:
     id: site_url
     attributes:
       label: "Live URL"
-      description: "Where is your project hosted? (Must include https://)"
-      placeholder: "https://my-app.example.com"
+      description: "Where is your project hosted?"
+      placeholder: "e.g., my-app.example.com or https://my-app.example.com"
     validations:
       required: true
 

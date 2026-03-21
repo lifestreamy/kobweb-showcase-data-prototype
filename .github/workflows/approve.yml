@@ -27,49 +27,65 @@ jobs:
         shell: python
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-          SITE_NAME: ${{ steps.parse.outputs.data.site_name }}
-          SITE_URL: ${{ steps.parse.outputs.data.site_url }}
-          IMAGE_URL: ${{ steps.parse.outputs.data.image_url }}
-          DESCRIPTION: ${{ steps.parse.outputs.data.description }}
-          FEATURES: ${{ steps.parse.outputs.data.features }}
-          CUSTOM_FEATURES: ${{ steps.parse.outputs.data.custom_features }}
+          PARSED_DATA: ${{ steps.parse.outputs.data }}
         run: |
           import json
           import os
+          import re
 
+          # Read the parsed data
+          parsed_data_str = os.environ.get('PARSED_DATA', '{}')
+          parsed_data = json.loads(parsed_data_str)
+
+          # Helper for extracting text from the zentered JSON structure
+          def get_text(key):
+              field = parsed_data.get(key, {})
+              if isinstance(field, dict):
+                  text = field.get('text', '')
+                  return '' if text == '_No response_' else text
+              if isinstance(field, list):
+                  return ';'.join(field)
+              return '' if field == '_No response_' else str(field)
 
           issue_id = int(os.environ['ISSUE_NUMBER'])
-          dropdown_features = os.environ.get('FEATURES', '')
-          custom_features = os.environ.get('CUSTOM_FEATURES', '')
+          
+          # Format URL (Auto-append https:// if missing)
+          raw_site_url = get_text('site_url').strip()
+          clean_site_url = raw_site_url if raw_site_url.startswith(('http://', 'https://')) else f"https://{raw_site_url}"
 
-          # GitHub's dropdown outputs commas by default. Convert those to semicolons.
-          dropdown_features = dropdown_features.replace(',', ';')
+          # Format Image (Extract clean URL from Markdown)
+          raw_image = get_text('image_url').strip()
+          clean_image_url = raw_image
+          
+          # Check if it looks like a Markdown image: ![alt](url)
+          if raw_image.startswith('![') and '](' in raw_image and raw_image.endswith(')'):
+              # Split by '](', take the second half, remove the trailing ')'
+              clean_image_url = raw_image.split('](')[1][:-1]
 
-          # Combine both strings using a semicolon
-          raw_features = f"{dropdown_features};{custom_features}"
-
-          # Split by semicolon, clean up whitespace
+          # Format features (convert commas to semicolons, split cleanly)
+          features = get_text('features').replace(',', ';')
+          custom_features = get_text('custom_features').replace(',', ';')
+          raw_features = f"{features};{custom_features}"
           clean_tags = [tag.strip() for tag in raw_features.split(';') if tag.strip() != 'None' and tag.strip()]
 
+          # Build the new site dict
           new_site = {
               "issueNumber": issue_id,
-              "name": os.environ['SITE_NAME'],
-              "url": os.environ['SITE_URL'],
-              "imageUrl": os.environ['IMAGE_URL'],
-              "description": os.environ.get('DESCRIPTION', ''),
+              "name": get_text('site_name').strip(),
+              "url": clean_site_url,
+              "imageUrl": clean_image_url,
+              "description": get_text('description').strip(),
               "tags": clean_tags
           }
 
           file_path = 'resources/showcase/showcased-sites.json'
 
-          # Read current JSON array
+          # Read current JSON array, append the new site, save
           with open(file_path, 'r') as file:
               sites = json.load(file)
 
-          # Add the new site to the array
           sites.append(new_site)
 
-          # Save the updated array back to the file
           with open(file_path, 'w') as file:
               json.dump(sites, file, indent=2)
 
