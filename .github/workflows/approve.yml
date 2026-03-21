@@ -5,6 +5,10 @@ on:
     types:
       - created
 
+concurrency:
+  group: showcase-file-lock
+  cancel-in-progress: false
+
 jobs:
   process-approval:
     runs-on: ubuntu-latest
