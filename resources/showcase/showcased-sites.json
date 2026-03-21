@@ -16,5 +16,18 @@
       "example",
       "example2"
     ]
+  },
+  {
+    "issueNumber": 2,
+    "name": "Test Example 2",
+    "url": "https://[www.example.com](http://www.example.com)",
+    "imageUrl": "https://github.com/user-attachments/assets/8c129ca2-0580-48c2-8f13-8beffea27380",
+    "description": "Test 2",
+    "tags": [
+      "Open Source",
+      "test2",
+      "test2",
+      "test3"
+    ]
   }
 ]
