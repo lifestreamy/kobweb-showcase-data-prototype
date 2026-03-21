@@ -21,7 +21,7 @@ jobs:
 
       - name: Parse Issue Form
         id: parse
-        uses: zentered/issue-forms-body-parser@v2.0.0
+        uses: zentered/issue-forms-body-parser@v2.2.0
 
       - name: Update showcased-sites.json with the new website
         shell: python
