@@ -59,6 +59,9 @@ jobs:
           
           # Format URL (Auto-append https:// if missing ; remove HTML brackets if any)
           raw_site_url = get_text('live-url').strip().strip('<>')
+          # work around GitHub automatically putting []() brackets around urls
+          if '](' in raw_site_url:
+              raw_site_url = raw_site_url.split('](', 1)[1].split(')', 1)[0].strip()
           clean_site_url = raw_site_url if raw_site_url.startswith(('http://', 'https://')) else f"https://{raw_site_url}"
 
           raw_body = os.environ.get('RAW_ISSUE_BODY', '')
