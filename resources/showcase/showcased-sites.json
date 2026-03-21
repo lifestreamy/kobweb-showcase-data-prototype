@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "issueNumber": 1,
+    "name": "Test Example",
+    "url": "https://example.com",
+    "imageUrl": "https://github.com/user-attachments/assets/7fa9fee9-7ba1-4eae-8f12-1b90e1ab29c5",
+    "description": "Test Example",
+    "tags": [
+      "Animations",
+      "Database Integration",
+      "Fullstack",
+      "Static Site (SSG)",
+      "Commercial",
+      "Complex UI",
+      "Open Source",
+      "example",
+      "example2"
+    ]
+  }
+]
