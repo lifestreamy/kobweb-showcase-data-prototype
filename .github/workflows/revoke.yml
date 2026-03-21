@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >
       github.event.comment.body == '/revoke' &&
-      contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), 
+      contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'),
       github.event.comment.author_association)
     permissions:
       contents: write
@@ -19,30 +19,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Remove website from showcased-sites.json
-        shell: python
+      - name: Remove site from showcased-sites.json
+        id: update_json
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          import json
-          import os
-
-          # Get the issue number to revoke
-          issue_id = int(os.environ['ISSUE_NUMBER'])
-          file_path = 'resources/showcase/showcased-sites.json'
-
-          # Read the current array
-          with open(file_path, 'r') as file:
-              sites = json.load(file)
-
-          # Keep only the sites that don't match this issue ID
-          updated_sites = [site for site in sites if site.get('issueNumber') != issue_id]
-
-          # Save the filtered array back to the file
-          with open(file_path, 'w') as file:
-              json.dump(updated_sites, file, indent=2)
+        run: python .github/scripts/revoke_showcase.py
 
       - name: Commit Changes
+        if: steps.update_json.outputs.action_result == 'revoked'
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
@@ -53,8 +37,13 @@ jobs:
           git commit -m "Revoke showcase submission #${ISSUE_NUMBER}"
           git push
 
-      - name: Leave Revocation Comment
+      - name: Comment on Issue without closing
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTION_RESULT: ${{ steps.update_json.outputs.action_result }}
         run: |
-          gh issue comment ${{ github.event.issue.number }} --body "🗑️ The submission has been revoked and the site was removed from the showcase."
+          if [ "$ACTION_RESULT" = "not_found" ]; then
+            gh issue comment ${{ github.event.issue.number }} --body "✅ There is no submission to revoke for this issue."
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "✅ The site has been successfully revoked and removed from the showcase."
+          fi
