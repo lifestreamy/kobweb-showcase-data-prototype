@@ -3,6 +3,13 @@ import os
 import sys
 
 
+def fail(msg):
+    print(f"::error::{msg}")
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+        f.write(f"error_msg={msg}\n")
+    sys.exit(1)
+
+
 # Helper for extracting text from the zentered JSON structure
 def get_text(key):
     field = parsed_data.get(key, {})
@@ -21,8 +28,7 @@ try:
     if isinstance(parsed_data, str):
         parsed_data = json.loads(parsed_data)
 except Exception as e:
-    print(f"::error::Failed to parse JSON data from GitHub Action: {e}")
-    sys.exit(1)
+    fail(f"Failed to parse JSON data from GitHub Action: {e}")
 
 issue_id = int(os.environ['ISSUE_NUMBER'])
 
@@ -53,16 +59,13 @@ site_name = get_text('project-name').strip()
 
 # Validation: check for empty critical fields
 if not site_name:
-    print("::error::Validation Failed: Site name cannot be empty.")
-    sys.exit(1)
+    fail("Validation Failed: Site name cannot be empty.")
 
 if not clean_site_url or clean_site_url == "https://":
-    print("::error::Validation Failed: Invalid or missing Site URL.")
-    sys.exit(1)
+    fail("Validation Failed: Invalid or missing Site URL.")
 
 if not clean_image_url:
-    print("::error::Validation Failed: Invalid or missing Image URL.")
-    sys.exit(1)
+    fail("Validation Failed: Invalid or missing Image URL.")
 
 # Build the new site dict
 new_site = {
@@ -80,7 +83,17 @@ file_path = 'resources/showcase/showcased-sites.json'
 with open(file_path, 'r') as file:
     sites = json.load(file)
 
-sites.append(new_site)
+existing_index = next((i for i, site in enumerate(sites) if site.get("issueNumber") == issue_id), -1)
+
+if existing_index >= 0:
+    sites[existing_index] = new_site
+    action_result = "updated"
+else:
+    sites.append(new_site)
+    action_result = "added"
 
 with open(file_path, 'w') as file:
     json.dump(sites, file, indent=2)
+
+with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+    f.write(f"action_result={action_result}\n")

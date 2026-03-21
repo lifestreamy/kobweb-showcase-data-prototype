@@ -24,6 +24,7 @@ jobs:
         uses: zentered/issue-forms-body-parser@v2.2.0
 
       - name: Update showcased-sites.json with the new website
+        id: update_json
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           PARSED_DATA: ${{ steps.parse.outputs.data }}
@@ -44,5 +45,18 @@ jobs:
       - name: Close Issue and Comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTION_RESULT: ${{ steps.update_json.outputs.action_result }}
         run: |
-          gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been approved and added to the showcase."
+          if [ "$ACTION_RESULT" = "updated" ]; then
+            gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been successfully updated in the showcase."
+          else
+            gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been approved and added to the showcase."
+          fi
+
+      - name: Comment on Error
+        if: failure() && steps.update_json.outputs.error_msg != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ERROR_MSG: ${{ steps.update_json.outputs.error_msg }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "❌ Approval Failed: ${ERROR_MSG}."
