@@ -86,14 +86,18 @@ with open(file_path, 'r') as file:
 existing_index = next((i for i, site in enumerate(sites) if site.get("issueNumber") == issue_id), -1)
 
 if existing_index >= 0:
-    sites[existing_index] = new_site
-    action_result = "updated"
+    if sites[existing_index] == new_site:
+        action_result = "unchanged"
+    else:
+        sites[existing_index] = new_site
+        action_result = "updated"
 else:
     sites.append(new_site)
     action_result = "added"
 
-with open(file_path, 'w') as file:
-    json.dump(sites, file, indent=2)
+if action_result != "unchanged":
+    with open(file_path, 'w') as file:
+        json.dump(sites, file, indent=2)
 
 with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
     f.write(f"action_result={action_result}\n")

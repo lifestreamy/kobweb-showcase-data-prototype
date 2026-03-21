@@ -32,6 +32,7 @@ jobs:
         run: python .github/scripts/approve_showcase.py
 
       - name: Commit Changes
+        if: steps.update_json.outputs.action_result != 'unchanged'
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
@@ -47,7 +48,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTION_RESULT: ${{ steps.update_json.outputs.action_result }}
         run: |
-          if [ "$ACTION_RESULT" = "updated" ]; then
+          if [ "$ACTION_RESULT" = "unchanged" ]; then
+            gh issue close ${{ github.event.issue.number }} --comment "✅ Nothing has changed since the last submission, keeping the last version."
+          elif [ "$ACTION_RESULT" = "updated" ]; then
             gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been successfully updated in the showcase."
           else
             gh issue close ${{ github.event.issue.number }} --comment "✅ The site has been approved and added to the showcase."
