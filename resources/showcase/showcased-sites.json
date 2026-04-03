@@ -16,5 +16,16 @@
       "example",
       "example2"
     ]
+  },
+  {
+    "issueNumber": 3,
+    "name": "kobweb-showcase-data-prototype",
+    "url": "https://github.com/lifestreamy/kobweb-showcase-data-prototype/",
+    "imageUrl": "https://github.com/user-attachments/assets/c6db74a9-70a4-4d58-b654-6ca2e68bdda4",
+    "description": "A prototype (proof of concept) of a fully GitHub-hosted JSON database, demonstrating how to use GitHub Issue Forms as a user-facing frontend and GitHub Actions as a backend, following the official IssueOps pattern.",
+    "tags": [
+      "Open Source",
+      "GitHub Actions"
+    ]
   }
 ]
