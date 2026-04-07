@@ -15,10 +15,10 @@ def get_text(key):
     field = parsed_data.get(key, {})
     if isinstance(field, dict):
         text = field.get('text', '')
-        return '' if text == '_No response_' else text
+        return '' if text.strip(' _*') == 'No response' else text
     if isinstance(field, list):
         return ';'.join(field)
-    return '' if field == '_No response_' else str(field)
+    return '' if field.strip(' _*') == 'No response' else str(field)
 
 
 parsed_data_str = os.environ.get('PARSED_DATA', '{}')
@@ -33,7 +33,7 @@ except Exception as e:
 issue_id = int(os.environ['ISSUE_NUMBER'])
 
 # Format URL (Auto-append https:// if missing ; remove <> around links that GitHub can put)
-raw_site_url = get_text('live-url').strip().strip('<>')
+raw_site_url = get_text('live-url').strip(' <>')
 # work around GitHub automatically putting []() brackets around urls
 if '](' in raw_site_url:
     raw_site_url = raw_site_url.split('](', 1)[1].split(')', 1)[0].strip()
@@ -49,9 +49,9 @@ if 'src="' in raw_body:
     else:
         clean_image_url = src_value
 
-# Format features
-features = get_text('core-features').replace(',', ';')
-custom_features = get_text('other-keywords').replace(',', ';')
+# Format features (tags are inputted having been split with a semicolon ";")
+features = get_text('core-features')
+custom_features = get_text('other-keywords')
 raw_features = f"{features};{custom_features}"
 clean_tags = [tag.strip() for tag in raw_features.split(';') if tag.strip() != 'None' and tag.strip()]
 
