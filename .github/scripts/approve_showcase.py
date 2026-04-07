@@ -49,9 +49,9 @@ if 'src="' in raw_body:
     else:
         clean_image_url = src_value
 
-# Format features
-features = get_text('core-features').replace(',', ';')
-custom_features = get_text('other-keywords').replace(',', ';')
+# Format features (tags are inputted having been split with a semicolon ";")
+features = get_text('core-features')
+custom_features = get_text('other-keywords')
 raw_features = f"{features};{custom_features}"
 clean_tags = [tag.strip() for tag in raw_features.split(';') if tag.strip() != 'None' and tag.strip()]
 
