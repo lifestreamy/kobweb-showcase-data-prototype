@@ -39,5 +39,15 @@
       "Open Source",
       "*No response*"
     ]
+  },
+  {
+    "issueNumber": 9,
+    "name": "Kobweb",
+    "url": "https://kobweb.varabyte.com",
+    "imageUrl": "https://github.com/user-attachments/assets/4b2cbbd5-5df4-463f-87de-1e7c88de441b",
+    "description": "The official Kobweb site, blah blah blah",
+    "tags": [
+      "Static Site (SSG), Open Source"
+    ]
   }
 ]
