@@ -33,7 +33,7 @@ except Exception as e:
 issue_id = int(os.environ['ISSUE_NUMBER'])
 
 # Format URL (Auto-append https:// if missing ; remove <> around links that GitHub can put)
-raw_site_url = get_text('live-url').strip().strip('<>')
+raw_site_url = get_text('live-url').strip(' <>')
 # work around GitHub automatically putting []() brackets around urls
 if '](' in raw_site_url:
     raw_site_url = raw_site_url.split('](', 1)[1].split(')', 1)[0].strip()
