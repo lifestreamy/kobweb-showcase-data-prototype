@@ -15,10 +15,10 @@ def get_text(key):
     field = parsed_data.get(key, {})
     if isinstance(field, dict):
         text = field.get('text', '')
-        return '' if text == '_No response_' else text
+        return '' if text.strip(' _*') == 'No response' else text
     if isinstance(field, list):
         return ';'.join(field)
-    return '' if field == '_No response_' else str(field)
+    return '' if field.strip(' _*') == 'No response' else str(field)
 
 
 parsed_data_str = os.environ.get('PARSED_DATA', '{}')
