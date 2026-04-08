@@ -67,6 +67,9 @@ if not clean_site_url or clean_site_url == "https://":
 if not clean_image_url:
     fail("Validation Failed: Invalid or missing Image URL.")
 
+if not clean_image_url.startswith("https://github.com/user-attachments/assets/"):
+    fail("The provided Image URL does not correspond to the GitHub CDN — \"https://github.com/user-attachments/assets/\"")
+
 # Build the new site dict
 new_site = {
     "issueNumber": issue_id,
