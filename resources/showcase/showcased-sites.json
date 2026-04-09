@@ -49,15 +49,5 @@
     "tags": [
       "Static Site (SSG), Open Source"
     ]
-  },
-  {
-    "issueNumber": 10,
-    "name": "Errors Test",
-    "url": "https://example.com",
-    "imageUrl": "https://github.com/user-attachments/assets/38e4b832-0c1f-4965-b28c-aebd3e6a89ef",
-    "description": "Error test",
-    "tags": [
-      "test 1,2"
-    ]
   }
 ]
