@@ -2,6 +2,16 @@ import json
 import os
 import sys
 
+ERR_PARSE = "Failed to parse JSON data from GitHub Action: {}"
+ERR_NAME_EMPTY = "Validation Failed: Site name cannot be empty"
+ERR_URL_INVALID = "Validation Failed: Invalid or missing Site URL"
+ERR_IMG_INVALID = "Validation Failed: Invalid or missing Image URL"
+ERR_IMG_CDN = "The provided Image URL does not correspond to the GitHub CDN — \"https://github.com/user-attachments/assets/\""
+
+MSG_UNCHANGED = "✅ Nothing has changed since the last submission, keeping the last version."
+MSG_UPDATED = "✅ The site has been successfully updated in the showcase."
+MSG_ADDED = "✅ The site has been approved and added to the showcase."
+
 
 def fail(msg):
     print(f"::error::{msg}")
@@ -28,7 +38,7 @@ try:
     if isinstance(parsed_data, str):
         parsed_data = json.loads(parsed_data)
 except Exception as e:
-    fail(f"Failed to parse JSON data from GitHub Action: {e}")
+    fail(ERR_PARSE.format(e))
 
 issue_id = int(os.environ['ISSUE_NUMBER'])
 
@@ -59,16 +69,16 @@ site_name = get_text('project-name').strip()
 
 # Validation: check for empty critical fields
 if not site_name:
-    fail("Validation Failed: Site name cannot be empty.")
+    fail(ERR_NAME_EMPTY)
 
 if not clean_site_url or clean_site_url == "https://":
-    fail("Validation Failed: Invalid or missing Site URL.")
+    fail(ERR_URL_INVALID)
 
 if not clean_image_url:
-    fail("Validation Failed: Invalid or missing Image URL.")
+    fail(ERR_IMG_INVALID)
 
 if not clean_image_url.startswith("https://github.com/user-attachments/assets/"):
-    fail("The provided Image URL does not correspond to the GitHub CDN — \"https://github.com/user-attachments/assets/\"")
+    fail(ERR_IMG_CDN)
 
 # Build the new site dict
 new_site = {
@@ -91,12 +101,15 @@ existing_index = next((i for i, site in enumerate(sites) if site.get("issueNumbe
 if existing_index >= 0:
     if sites[existing_index] == new_site:
         action_result = "unchanged"
+        success_message = MSG_UNCHANGED
     else:
         sites[existing_index] = new_site
         action_result = "updated"
+        success_message = MSG_UPDATED
 else:
     sites.append(new_site)
     action_result = "added"
+    success_message = MSG_ADDED
 
 if action_result != "unchanged":
     with open(file_path, 'w') as file:
@@ -104,3 +117,4 @@ if action_result != "unchanged":
 
 with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
     f.write(f"action_result={action_result}\n")
+    f.write(f"success_msg={success_message}\n")
