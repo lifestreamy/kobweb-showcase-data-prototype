@@ -44,10 +44,6 @@ jobs:
       - name: Comment on Issue without closing
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ACTION_RESULT: ${{ steps.update_json.outputs.action_result }}
+          SUCCESS_MSG: ${{ steps.update_json.outputs.success_msg }}
         run: |
-          if [ "$ACTION_RESULT" = "not_found" ]; then
-            gh issue comment ${{ github.event.issue.number }} --body "✅ There is no submission to revoke for this issue."
-          else
-            gh issue comment ${{ github.event.issue.number }} --body "✅ The site has been successfully revoked and removed from the showcase."
-          fi
+          gh issue comment ${{ github.event.issue.number }} --body "${SUCCESS_MSG}"
